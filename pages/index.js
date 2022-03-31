@@ -109,6 +109,10 @@ export default function Home() {
       });
   };
 
+  const handleConfirm = () => {
+    setDeployedContractAddress("");
+  };
+
   const addressInputs = partners.map((partner, index) => {
     return (
       <PartnerInput
