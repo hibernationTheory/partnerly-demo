@@ -1,6 +1,8 @@
 import Web3 from 'web3'
 import { useEffect, useRef, useState } from 'react'
 
+import Contract from '../contract/Contract'
+
 function MainButton({ onClick, disabled, label }) {
   return (
     <button
@@ -83,6 +85,8 @@ function PartnerInput({ address, split }) {
 
 export default function Home() {
   const web3 = useRef(null)
+
+  const [isDeploying, setIsDeploying] = useState(false)
   const [currentAccount, setCurrentAccount] = useState(null)
   const [hasWalletWarning, setHasWalletWarning] = useState(false)
   const [partners, setPartners] = useState([
@@ -143,6 +147,45 @@ export default function Home() {
     }
   }
 
+  const handleStartPartnership = async () => {
+    const addresses = [partners[0].address, partners[1].address]
+    const splitRatio = [partners[0].split, partners[1].split]
+    const contractArguments = [addresses, splitRatio]
+
+    const { abi, bytecode } = Contract
+    const contract = new web3.current.eth.Contract(abi)
+
+    const contractDeploymentData = {
+      data: bytecode,
+      arguments: contractArguments,
+    }
+
+    const gas = await contract.deploy(contractDeploymentData).estimateGas()
+
+    setIsDeploying(true)
+
+    contract
+      .deploy(contractDeploymentData)
+      .send({
+        from: currentAccount,
+        gas,
+      })
+      .on('error', (error) => {
+        console.log(error)
+        setIsDeploying(false)
+      })
+      .on('receipt', (receipt) => {
+        // receipt will contain deployed contract address
+        console.log(receipt)
+
+        setIsDeploying(false)
+      })
+      .on('confirmation', (_confirmationNumber, receipt) => {
+        console.log(receipt)
+        setIsDeploying(false)
+      })
+  }
+
   const addressInputs = partners.map((partner, index) => {
     return (
       <PartnerInput
@@ -188,9 +231,12 @@ export default function Home() {
     )
   })
 
+  const hasErrors = partners.some((partner) => Boolean(partner.error))
+  const hasEmptyValues = partners.some((partner) => !Boolean(partner.address))
+
   return (
     <div className="flex flex-col min-h-screen">
-      <main className="flex flex-1 flex-col items-center justify-start py-8 pt-12  px-6 md:pt-20 text-zinc-700">
+      <main className="flex flex-1 flex-col items-center justify-start py-8 pt-12 px-6 md:pt-20 text-zinc-700">
         <h1 className="text-7xl md:text-6xl font-extrabold text-indigo-600 mb-3 pb-2">
           Partnerly
         </h1>
@@ -214,6 +260,18 @@ export default function Home() {
 
         {currentAccount && (
           <div className="grid grid-cols-1 gap-3 mb-6">{addressInputs}</div>
+        )}
+
+        {currentAccount && (
+          <div className="flex flex-col justify-center items-center p-3">
+            <div>
+              <MainButton
+                onClick={handleStartPartnership}
+                disabled={hasErrors || hasEmptyValues || isDeploying}
+                label={isDeploying ? 'Deploying' : 'Partner Up!'}
+              />
+            </div>
+          </div>
         )}
       </main>
     </div>
