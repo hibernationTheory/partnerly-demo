@@ -86,6 +86,7 @@ function PartnerInput({ address, split }) {
 export default function Home() {
   const web3 = useRef(null)
 
+  const [deployedContractAddress, setDeployedContractAddress] = useState('')
   const [isDeploying, setIsDeploying] = useState(false)
   const [currentAccount, setCurrentAccount] = useState(null)
   const [hasWalletWarning, setHasWalletWarning] = useState(false)
@@ -179,6 +180,7 @@ export default function Home() {
         console.log(receipt)
 
         setIsDeploying(false)
+        setDeployedContractAddress(receipt.contractAddress)
       })
       .on('confirmation', (_confirmationNumber, receipt) => {
         console.log(receipt)
@@ -233,6 +235,42 @@ export default function Home() {
 
   const hasErrors = partners.some((partner) => Boolean(partner.error))
   const hasEmptyValues = partners.some((partner) => !Boolean(partner.address))
+
+  const handleConfirm = () => {
+    setDeployedContractAddress('')
+  }
+
+  if (deployedContractAddress) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <main className="flex flex-1 flex-col items-center justify-start py-8 pt-12 px-6 md:pt-20 text-zinc-700">
+          <h1 className="text-5xl md:text-6xl font-extrabold mb-3 pb-2 text-indigo-600">
+            Congratulations!
+          </h1>
+
+          <section className="max-w-md text-center mb-12">
+            <p className="text-sm mb-6">
+              Your contract is now deployed at this address. <br />
+              <span className="font-bold">You should write it down.</span>
+            </p>
+            <p className="font-bold mb-6 text-sm border-dashed border-2 p-1 border-slate-600">
+              {deployedContractAddress}
+            </p>
+            <p className="text-sm">
+              Any payment made to this address will be split in between you and
+              your partner when withdrawn.
+            </p>
+            <div className="p-4 flex flex-col justify-center items-center">
+              <MainButton
+                label={'I wrote down the address'}
+                onClick={handleConfirm}
+              />
+            </div>
+          </section>
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
