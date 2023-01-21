@@ -16,12 +16,12 @@ export function MainButton({ onClick, disabled, label }) {
   );
 }
 
-export function AddressInput({ label, value, onChange, onBlur, error }) {
+export function AddressInput({ id, label, value, onChange, onBlur, error }) {
   return (
     <div className="flex flex-col">
-      <label htmlFor={label}>{label}</label>
+      <label htmlFor={`address-${id}`}>{label}</label>
       <input
-        name={label}
+        id={`address-${id}`}
         value={value}
         type="text"
         onChange={(event) => onChange(event.target.value)}
@@ -38,12 +38,12 @@ export function AddressInput({ label, value, onChange, onBlur, error }) {
   );
 }
 
-export function SplitInput({ name, value, onChange }) {
+export function SplitInput({ id, value, onChange }) {
   return (
     <div className="flex flex-col">
-      <label htmlFor={`split-${name}`}>Split</label>
+      <label htmlFor={`split-${id}`}>Split</label>
       <input
-        name={`split-${name}`}
+        id={`split-${id}`}
         value={value}
         type="number"
         onChange={(event) => onChange(Number(event.target.value))}
@@ -61,6 +61,7 @@ export function PartnerInput({ address, split }) {
     <div className={"flex"}>
       <div className={"mr-3 w-full"}>
         <AddressInput
+          id={address.id}
           label={address.label}
           value={address.value}
           onChange={address.onChange}
@@ -70,7 +71,7 @@ export function PartnerInput({ address, split }) {
       </div>
       <div className={"w-1/5"}>
         <SplitInput
-          name={split.name}
+          id={split.id}
           value={split.value}
           onChange={split.onChange}
         />

@@ -112,6 +112,7 @@ export default function Withdraw() {
   const addressInput = (
     <AddressInput
       label={""}
+      id={"withdraw"}
       value={address}
       onChange={(value) => {
         setAddress(value);

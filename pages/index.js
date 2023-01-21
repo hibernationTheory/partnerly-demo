@@ -117,6 +117,7 @@ export default function Home() {
     return (
       <PartnerInput
         address={{
+          id: partner.id,
           label: partner.label,
           value: partner.address,
           onChange: (value) => {
@@ -141,7 +142,7 @@ export default function Home() {
           error: partner.error,
         }}
         split={{
-          name: partner.label,
+          id: partner.id,
           value: partner.split,
           onChange: (value) => {
             setPartners((oldPartnersState) => {
