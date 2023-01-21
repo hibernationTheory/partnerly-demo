@@ -1,8 +1,17 @@
 import Web3 from 'web3'
 import { useEffect, useRef, useState } from 'react'
 
+function MainButton({ onClick, disabled, label }) {
+  return (
+    <button onClick={onClick} disabled={disabled}>
+      <span>{label}</span>
+    </button>
+  )
+}
+
 export default function Home() {
   const web3 = useRef(null)
+  const [currentAccount, setCurrentAccount] = useState(null)
   const [hasWalletWarning, setHasWalletWarning] = useState(false)
 
   const checkIfWalletIsConnected = () => {
@@ -27,13 +36,35 @@ export default function Home() {
     web3.current.eth.getBlock('latest').then((block) => console.log(block))
   }, [])
 
+  const connectWallet = async () => {
+    if (!checkIfWalletIsConnected()) {
+      return
+    }
+
+    try {
+      const { ethereum } = window
+
+      const accounts = await ethereum.request({
+        method: 'eth_requestAccounts',
+      })
+
+      console.log('Connected', accounts[0])
+      setCurrentAccount(accounts[0])
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <div>
       <main>
-        {hasWalletWarning ? (
+        {hasWalletWarning && (
           <p>You will need MetaMask or equivalent to use this app.</p>
-        ) : (
-          <p>You seem to have a compatible wallet!</p>
+        )}
+        {!currentAccount && (
+          <div>
+            <MainButton onClick={connectWallet} label={'Connect Wallet'} />
+          </div>
         )}
       </main>
     </div>
